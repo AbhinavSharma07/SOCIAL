@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "build": "echo 'Building project...' && mkdir -p social && cp -r src/* social/",
+    "build": "mkdir -p social && if [ -d src ]; then cp -r src/* social/; else echo 'src directory does not exist'; fi",
     "dev": "nodemon ./bin/www"
   },
   "dependencies": {
