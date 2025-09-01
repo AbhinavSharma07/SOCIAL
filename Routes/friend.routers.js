@@ -1,13 +1,28 @@
 const express = require('express');
 const checkAuth = require('../Middleware/checkAuth.middleware');
-const friendControllers = require('../Controllers/friendR.controllers');
+const friendControllers = require('../Controllers/friend.controllers');
+
 const router = express.Router();
 
-router.post('/sendReq/:fId', checkAuth, friendControllers.sendReq);
+/**
+ * @route   POST /friends/send-request/:fId
+ * @desc    Send a friend request
+ * @access  Private
+ */
+router.post('/send-request/:fId', checkAuth, friendControllers.sendRequest);
 
-router.post('/:Action/:fId', checkAuth, friendControllers.Frirequest);
+/**
+ * @route   POST /friends/:action/:fId
+ * @desc    Handle friend request action (accept/decline/cancel)
+ * @access  Private
+ */
+router.post('/:action/:fId', checkAuth, friendControllers.handleRequestAction);
 
-router.get('/friendlist', checkAuth, friendControllers.friendlist);
+/**
+ * @route   GET /friends/list
+ * @desc    Get user’s friend list
+ * @access  Private
+ */
+router.get('/list', checkAuth, friendControllers.getFriendList);
 
-
-module.exports = router
+module.exports = router;

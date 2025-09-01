@@ -1,97 +1,77 @@
 const knex = require("../Models/friend");
-const {getUid} = require('./users.controllers');
+const { getUid } = require("./users.controllers");
 
-const sendReq = (req, res, next) => {
-    console.log(req,'req');
-    var fId = req.params.fId;
-    knex.isExistsFid(fId)
-    .then((isexistsfid) =>{
-        console.log(isexistsfid);
-        if(isexistsfid.length)
-        {
-            var activeUser = getUid(req)
-            knex.sendfriendReq(activeUser.userId , fId)
-            .then(() =>{
-                res.status(200).json({
-                    message: "sent friend Request"  + fId
-                });
-            })
-            .catch((err) => {
-                console.log(err)
-                res.status(500).json({
-                message: err.toString()
-                })
-            });
-        }
-        else {
-            res.status(404).json({
-                message: 'invaild fId ' + `${fId}`
-            });
-        }
-    })
-    .catch((err) => {
-        res.status(500).json({
-            error: err,
-        });
-    });
-}
+/**
+ * Send a friend request
+ */
+const sendReq = async (req, res) => {
+  try {
+    const { fId } = req.params;
+    const activeUser = getUid(req);
 
+    if (!fId || isNaN(fId)) {
+      return res.status(400).json({ message: "Invalid friend ID" });
+    }
 
-const Frirequest =async (req, res, next) => {
-    var Action = req.params.Action 
-    var fId = req.params.fId;
-    knex.isExistsFid(fId)
-    .then((isexistsfid) =>{ 
-        console.log(isexistsfid);
-        if(isexistsfid.length)
-        {
-            var activeUser = getUid(req)
-            knex.friendReq(activeUser.userId , fId, Action)
-            .then(() =>{
-                res.status(200).json({
-                    message: "Successful Request :)" 
-                });
-            })
-            .catch((err) => {
-                console.log(err)
-                res.status(500).json({
-                message: err.toString()
-                })
-            });
-        }
-        else {
-            res.status(404).json({
-                message: 'invaild fId ' + `${fId}`
-            });
-        }
-    })
-    .catch(() => {
-        res.status(500).json({
-            error: 'Something Went Wrong ',
-        });
-    });
-}
+    const userExists = await knex.isExistsFid(fId);
+    if (!userExists.length) {
+      return res.status(404).json({ message: `User with id ${fId} not found` });
+    }
 
-const friendlist = (req, res, next) => { 
-    var activeUser = getUid(req)
-    knex.friendList(activeUser.userId)
-    .then((friendlist) =>{ 
-        if(friendlist.length){
-            res.status(200).json(friendlist);
-        }
-        else {
-            res.send('friend not found')
-        }
-    })
-    .catch((err) => {
-        res.status(500).json({
-        message: err
-        })
-    });
+    await knex.sendfriendReq(activeUser.userId, fId);
+    res.status(200).json({ message: `Friend request sent to user ${fId}` });
+  } catch (err) {
+    console.error("Error in sendReq:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-}
+/**
+ * Accept / Reject / Cancel a friend request
+ */
+const Frirequest = async (req, res) => {
+  try {
+    const { Action, fId } = req.params;
+    const activeUser = getUid(req);
+
+    if (!["accept", "reject", "cancel"].includes(Action.toLowerCase())) {
+      return res.status(400).json({ message: "Invalid action type" });
+    }
+
+    const userExists = await knex.isExistsFid(fId);
+    if (!userExists.length) {
+      return res.status(404).json({ message: `User with id ${fId} not found` });
+    }
+
+    await knex.friendReq(activeUser.userId, fId, Action.toLowerCase());
+    res.status(200).json({ message: `Request ${Action}ed successfully` });
+  } catch (err) {
+    console.error("Error in Frirequest:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+/**
+ * Get logged-in user's friend list
+ */
+const friendlist = async (req, res) => {
+  try {
+    const activeUser = getUid(req);
+    const friends = await knex.friendList(activeUser.userId);
+
+    if (!friends.length) {
+      return res.status(404).json({ message: "No friends found" });
+    }
+
+    res.status(200).json(friends);
+  } catch (err) {
+    console.error("Error in friendlist:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 module.exports = {
-    sendReq,
-    Frirequest,
-    friendlist
-  };
+  sendReq,
+  Frirequest,
+  friendlist,
+};
