@@ -1,43 +1,106 @@
-const knex=require("./connection")
+const knex = require("./connection");
 
-let register = (data)=>{
-    return knex('users').insert(data)
-}
+// Register a new user
+const register = async (data) => {
+  try {
+    const [user_id] = await knex('users').insert(data).returning('user_id');
+    return { user_id, message: "User registered successfully" };
+  } catch (err) {
+    throw new Error(err.message || "Error registering user");
+  }
+};
 
-let IsUser = (email)=>{
-    return knex.select('user_id','email','password').from('users').where('email',email)
-}
+// Check if a user exists by email
+const IsUser = async (email) => {
+  try {
+    const user = await knex('users')
+      .select('user_id', 'email', 'password')
+      .where('email', email);
+    return user;
+  } catch (err) {
+    throw new Error(err.message || "Error checking user");
+  }
+};
 
-let me = (username)=>{
-    return knex.select('username','first_name','last_name', 'email', 'city','state','country', 'profile_picture_url', 'birth_date').from('users').where('username',username)
-}
- 
-let enter_token = (token, email) => {
-    return knex('users').update({"reset_token":token}).where('email',email)
-}
+// Get user info by username
+const me = async (username) => {
+  try {
+    const userData = await knex('users')
+      .select('username', 'first_name', 'last_name', 'email', 'city', 'state', 'country', 'profile_picture_url', 'birth_date')
+      .where('username', username);
+    return userData;
+  } catch (err) {
+    throw new Error(err.message || "Error fetching user data");
+  }
+};
 
-let isToken = (token) => {
-    return knex('users').select('user_id','email').where("reset_token",token)
-}
+// Store reset token
+const enter_token = async (token, email) => {
+  try {
+    await knex('users')
+      .update({ reset_token: token })
+      .where('email', email);
+    return { message: "Token stored successfully" };
+  } catch (err) {
+    throw new Error(err.message || "Error storing token");
+  }
+};
 
-let updatePassword = (password,user_id) => {
-    return knex('users').update('password',password).where('user_id',user_id)
-}
+// Verify reset token
+const isToken = async (token) => {
+  try {
+    const user = await knex('users')
+      .select('user_id', 'email')
+      .where('reset_token', token);
+    return user;
+  } catch (err) {
+    throw new Error(err.message || "Error verifying token");
+  }
+};
 
-let updateTokenNull = (user_id) => {
-    return knex('users').update('reset_token',null).where('user_id',user_id)
-}
+// Update user password
+const updatePassword = async (password, user_id) => {
+  try {
+    await knex('users')
+      .update('password', password)
+      .where('user_id', user_id);
+    return { message: "Password updated successfully" };
+  } catch (err) {
+    throw new Error(err.message || "Error updating password");
+  }
+};
 
-let updateProfile = (data, user_id) => {
-    return knex('users').update(data).where('user_id',user_id)
-}
+// Clear reset token
+const updateTokenNull = async (user_id) => {
+  try {
+    await knex('users')
+      .update('reset_token', null)
+      .where('user_id', user_id);
+    return { message: "Reset token cleared" };
+  } catch (err) {
+    throw new Error(err.message || "Error clearing token");
+  }
+};
+
+// Update user profile
+const updateProfile = async (data, user_id) => {
+  try {
+    await knex('users')
+      .update(data)
+      .where('user_id', user_id);
+    return { message: "Profile updated successfully" };
+  } catch (err) {
+    throw new Error(err.message || "Error updating profile");
+  }
+};
+
 module.exports = {
-    updateTokenNull,
-    updatePassword,
-    updateProfile,
-    enter_token,
-    register, 
-    isToken,
-    IsUser, 
-    me
+  register,
+  IsUser,
+  me,
+  enter_token,
+  isToken,
+  updatePassword,
+  updateTokenNull,
+  updateProfile
 };
