@@ -1,4 +1,4 @@
-# 🌐 Social Backend API 
+# 🌐 Social Backend API 📲
 
 This is a **Node.js backend** for a social media platform with features like user registration, authentication, posts, and friend management. It uses **Express.js**, **Knex.js (MySQL)**, **Redis caching**, **JWT authentication**, and **Nodemailer** for email notifications.
 
