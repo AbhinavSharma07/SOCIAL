@@ -32,6 +32,15 @@ CREATE TABLE IF NOT EXISTS `relationship` (
 ALTER TABLE `relationship`
 ADD UNIQUE KEY `unique_users_id` (`user_one_id`,`user_two_id`);
 
+CREATE TABLE IF NOT EXISTS `mypost` (
+  `post_id` int(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+ `user_id` INT(10) UNSIGNED NOT NULL,
+  `caption` VARCHAR(255) ,
+  `img_url` VARCHAR(255) ,
+  FOREIGN KEY (`user_id`) REFERENCES users(`user_id`),
+  PRIMARY KEY (`post_id`)
+);
+
 INSERT INTO `users` (`user_id`, `username`, `email`, `password`) VALUES
 (1, 'user1', 'user1@gmail.com', sha2('password', 256)),
 (2, 'user2', 'user2@gmail.com', sha2('password', 256)),
@@ -48,15 +57,4 @@ INSERT INTO `relationship` (`user_one_id`, `user_two_id`, `status`, `action_user
 (1, 6, 3, 1),
 (2, 3, 1, 2),
 (2, 4, 1, 4),
-(3, 5, 1, 3),
-(1, 7, 0, 1);
-
-
-CREATE  TABLE IF NOT EXISTS `mypost` (
-  `post_id` int(20) UNSIGNED NOT NULL AUTO_INCREMENT,
- `user_id` INT(10) UNSIGNED NOT NULL,
-  `caption` VARCHAR(255) ,
-  `img_url` VARCHAR(255) ,
-  FOREIGN KEY (`user_id`) REFERENCES users(`user_id`),
-  PRIMARY KEY (`post_id`)
-);
+(3, 5, 1, 3);
